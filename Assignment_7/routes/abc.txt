@@ -1,0 +1,72 @@
+const express = require('express');
+const mysql2 = require('mysql2');
+const config = require('../config.js');
+
+const app = express.Router();
+
+const connectionDetails = {
+    host: "localhost", 
+    database: "airbnb_db",
+    user: "KD2-87243-kartik", 
+    password: "manager",
+    port: 3306
+};
+
+app.get('/displaybooking', (request, response)=> {
+
+    var connection = mysql2.createConnection(connectionDetails)
+    connection.connect();
+
+    const queryText = `select * from bookings;`
+
+    connection.query(queryText, (error, result) => {
+
+       // response.setHeader('Content-Type', 'application/json');
+
+        if(error == null)
+        {
+            response.write(JSON.stringify(result))
+        }
+        else
+        {
+            response.write(JSON.stringify(error));
+        }
+        response.end();
+    })
+    connection.end();
+});
+
+
+app.post('/addbooking', (request, response)=> {
+
+    var connection = mysql2.createConnection(connectionDetails)
+    connection.connect();
+
+    const { propertyId, total, fromDate, toDate } = request.body;
+
+    const queryText = `insert into bookings(userId, propertyId, total, fromDate, toDate) values (?,?,?,?,?);`    
+    // const queryText = `insert into bookings(userId, propertyId, total, fromDate, toDate) values (${request.userId}, ${propertyId}, 
+    // ${total}, ${fromDate}, ${toDate});`
+
+    console.log(request.userId);
+    console.log(request.body);
+
+    connection.query(queryText, [ propertyId, total, fromDate, toDate ], (error, result) => {
+
+        // response.setHeader('Content-Type', 'application/json');
+
+        if(error == null)
+        {
+            response.write(JSON.stringify(result))
+        }
+        else
+        {
+            response.write(JSON.stringify(error));
+        }
+        response.end();
+    })
+    connection.end();
+});
+
+
+module.exports = app;
